@@ -13,6 +13,8 @@ const transporter = nodemailer.createTransport({
   tls: {
     rejectUnauthorized: false,
   },
+  debug: true, // Habilitar log de depuración
+  logger: true // Loguear la conexión en la consola
 });
 
 const sendGiftEmail = async (recipientEmail, recipientName) => {
