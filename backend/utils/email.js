@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const { sql } = require('@vercel/postgres');
+const { sql, createTemplatesTable } = require('./db');
 
 // ATENCIÓN: Reemplazar con los datos correctos del servidor SMTP
 const transporter = nodemailer.createTransport({
@@ -19,11 +19,16 @@ const transporter = nodemailer.createTransport({
 
 const sendGiftEmail = async (recipientEmail, recipientName) => {
   try {
+    // Asegurarse de que la tabla de plantillas existe antes de leerla.
+    await createTemplatesTable();
+
     const { rows } = await sql`SELECT email_template FROM templates WHERE id = 1`;
-    if (rows.length === 0) {
-      throw new Error('No se encontró la plantilla de correo en la base de datos.');
+    if (rows.length === 0 || !rows[0].email_template) {
+      throw new Error('No se encontró la plantilla de correo en la base de datos o está vacía.');
     }
-    const emailHtml = rows[0].email_template.replaceAll('${name}', recipientName);
+    
+    const finalRecipientName = recipientName || 'nuevo miembro';
+    const emailHtml = rows[0].email_template.replace(/\${name}/g, finalRecipientName);
 
     const subject = '🎁 ¡Tu Regalo Especial de Ángeles Sagrados!';
     return await sendCustomEmail(recipientEmail, subject, emailHtml);
@@ -31,8 +36,9 @@ const sendGiftEmail = async (recipientEmail, recipientName) => {
   } catch (error) {
     console.error('Error al leer o procesar la plantilla de correo desde la BD:', error);
     // Fallback a un correo genérico si la plantilla falla
+    const finalRecipientName = recipientName || 'nuevo miembro';
     const fallbackHtml = `
-      <h1>¡Hola, ${recipientName}!</h1>
+      <h1>¡Hola, ${finalRecipientName}!</h1>
       <p>Gracias por registrarte. Accede a tus regalos aquí:</p>
       <a href="https://libros-mu.vercel.app/dashboard">Acceder a mis regalos</a>
     `;
