@@ -8,11 +8,15 @@ const { sendGiftEmail, sendCustomEmail } = require('./utils/email');
 const { sendWhatsAppMessage } = require('./utils/whatsapp');
 const { ADMIN_USERNAME, ADMIN_PASSWORD_HASH, JWT_SECRET } = require('./config');
 const { sql, createContactsTable } = require('./utils/db');
-
-// Crear la tabla de contactos al iniciar la aplicación
-// createContactsTable(); // Movido dentro del handler para más seguridad
 const verifyToken = require('./middleware/auth');
 const multer = require('multer');
+
+const app = express();
+const port = 3001;
+
+app.use(cors());
+app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const CONTACTS_PATH = path.join(__dirname, 'contacts.json');
 const TEMPLATES_PATH = path.join(__dirname, 'templates.json');
@@ -94,13 +98,18 @@ app.post('/api/register', (req, res) => {
     try {
       // 1. Ensure table exists and insert contact
       await createContactsTable();
-      await sql`INSERT INTO contacts (name, email, whatsapp) VALUES (${name}, ${email}, ${whatsapp}) ON CONFLICT (email) DO NOTHING`;
-      console.log(`Contacto guardado en segundo plano para: ${email}`);
+      const result = await sql`INSERT INTO contacts (name, email, whatsapp) VALUES (${name}, ${email}, ${whatsapp}) ON CONFLICT (email) DO NOTHING`;
 
-      // 2. Send notifications
-      await sendGiftEmail(email, name);
-      await sendWhatsAppMessage(whatsapp, name);
-      console.log(`Notificaciones enviadas en segundo plano para: ${email}`);
+      // Only send notifications if the user was newly inserted
+      if (result.count > 0) {
+        console.log(`Nuevo contacto guardado en segundo plano para: ${email}`);
+        // 2. Send notifications for new users
+        await sendGiftEmail(email, name);
+        await sendWhatsAppMessage(whatsapp, name);
+        console.log(`Notificaciones enviadas en segundo plano para: ${email}`);
+      } else {
+        console.log(`El contacto ${email} ya existía. No se enviaron notificaciones duplicadas.`);
+      }
 
     } catch (error) {
       // Log any errors that happen in the background. The user is already gone.
