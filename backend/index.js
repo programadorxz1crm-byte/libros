@@ -81,23 +81,6 @@ app.post('/api/register', async (req, res) => {
   console.log('Datos recibidos:', req.body);
   const { name, email, whatsapp } = req.body;
 
-  // Guardar contacto (Desactivado temporalmente por incompatibilidad con Vercel)
-  /*
-  fs.readFile(CONTACTS_PATH, 'utf8', (err, data) => {
-    if (err && err.code !== 'ENOENT') {
-      return console.error('Error al leer los contactos.');
-    }
-    const contacts = data ? JSON.parse(data) : [];
-    if (!contacts.some(contact => contact.email === email || contact.whatsapp === whatsapp)) {
-      contacts.push({ name, email, whatsapp });
-      fs.writeFile(CONTACTS_PATH, JSON.stringify(contacts, null, 2), (err) => {
-        if (err) return console.error('Error al guardar el contacto en Vercel:', err);
-        console.log('Nuevo contacto guardado:', { name, email, whatsapp });
-      });
-    }
-  });
-  */
-
   // Intentar enviar correo y WhatsApp, pero no bloquear el registro si fallan.
   sendGiftEmail(email, name).then(result => {
     if (!result.success) {
