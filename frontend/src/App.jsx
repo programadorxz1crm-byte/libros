@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/admin/LoginPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import UserDashboard from './pages/UserDashboard';
+import './styles/main.css';
 
 function App() {
   return (
