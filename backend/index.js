@@ -7,6 +7,10 @@ const path = require('path');
 const { sendGiftEmail, sendCustomEmail } = require('./utils/email');
 const { sendWhatsAppMessage } = require('./utils/whatsapp');
 const { ADMIN_USERNAME, ADMIN_PASSWORD_HASH, JWT_SECRET } = require('./config');
+const { pool, createContactsTable } = require('./utils/db');
+
+// Crear la tabla de contactos al iniciar la aplicación
+createContactsTable();
 const verifyToken = require('./middleware/auth');
 const multer = require('multer');
 
@@ -78,24 +82,29 @@ app.get('/api/content', (req, res) => {
 // --- Rutas Públicas ---
 
 app.post('/api/register', async (req, res) => {
-  console.log('Datos recibidos:', req.body);
   const { name, email, whatsapp } = req.body;
 
-  // Intentar enviar correo y WhatsApp, pero no bloquear el registro si fallan.
-  sendGiftEmail(email, name).then(result => {
-    if (!result.success) {
-      console.error('Error al enviar el correo de bienvenida:', result.error);
-    }
-  });
+  try {
+    // Guardar contacto en la base de datos
+    const insertQuery = 'INSERT INTO contacts (name, email, whatsapp) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING';
+    await pool.query(insertQuery, [name, email, whatsapp]);
 
-  sendWhatsAppMessage(whatsapp, name).then(result => {
-    if (!result.success) {
-      console.error('Error al enviar el WhatsApp de bienvenida:', result.error);
-    }
-  });
+    // Intentar enviar correo y WhatsApp, pero no bloquear el registro si fallan.
+    sendGiftEmail(email, name).then(result => {
+      if (!result.success) console.error('Error al enviar el correo de bienvenida:', result.error);
+    });
 
-  // Responder inmediatamente con éxito para que el usuario sea redirigido.
-  res.status(200).send({ message: 'Registro procesado.' });
+    sendWhatsAppMessage(whatsapp, name).then(result => {
+      if (!result.success) console.error('Error al enviar el WhatsApp de bienvenida:', result.error);
+    });
+
+    // Responder inmediatamente con éxito para que el usuario sea redirigido.
+    res.status(200).send({ message: 'Registro procesado.' });
+
+  } catch (error) {
+    console.error('Error en el proceso de registro:', error);
+    res.status(500).send({ message: 'Hubo un error interno al procesar tu registro.' });
+  }
 });
 
 // --- Rutas de Admin ---
@@ -138,16 +147,14 @@ app.post('/api/admin/send-email', verifyToken, async (req, res) => {
   }
 });
 
-app.get('/api/admin/contacts', verifyToken, (req, res) => {
-  fs.readFile(CONTACTS_PATH, 'utf8', (err, data) => {
-    if (err) {
-      if (err.code === 'ENOENT') { // Si el archivo no existe, devolvemos una lista vacía
-        return res.json([]);
-      }
-      return res.status(500).send({ message: 'Error al leer los contactos' });
-    }
-    res.json(JSON.parse(data));
-  });
+app.get('/api/admin/contacts', verifyToken, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT name, email, whatsapp FROM contacts ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener los contactos:', error);
+    res.status(500).send({ message: 'Error al leer los contactos' });
+  }
 });
 
 // Rutas para la configuración del video de bienvenida
