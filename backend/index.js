@@ -47,9 +47,21 @@ app.get('/api/content', (req, res) => {
   const uploadDir = path.join(__dirname, 'uploads');
   fs.readdir(uploadDir, (err, files) => {
     if (err) {
+      // Si el directorio no existe, devolvemos una lista vacía
+      if (err.code === 'ENOENT') {
+        return res.status(200).json([]);
+      }
       return res.status(500).send({ message: 'Error al leer el contenido.' });
     }
-    const content = files.map(file => {
+
+    // Ordenar archivos por fecha (el más reciente primero)
+    const sortedFiles = files.sort((a, b) => {
+      const timeA = parseInt(a.split('-')[0], 10);
+      const timeB = parseInt(b.split('-')[0], 10);
+      return timeB - timeA;
+    });
+
+    const content = sortedFiles.map(file => {
       const extension = path.extname(file).toLowerCase();
       let type = 'file';
       if (['.mp4', '.mov', '.avi'].includes(extension)) {

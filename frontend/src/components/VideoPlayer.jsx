@@ -22,7 +22,7 @@ const VideoPlayer = () => {
   }, []);
 
   if (!videoUrl) {
-    return null; // No mostrar nada si no hay video
+    return <p style={{ textAlign: 'center', padding: '2rem 0' }}>No hay video de bienvenida disponible en este momento.</p>;
   }
 
   return (
