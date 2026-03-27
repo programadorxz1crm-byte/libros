@@ -63,7 +63,7 @@ const EmailSender = ({ token }) => {
   };
 
   return (
-    <div>
+    <div className="card">
       <h3>Enviar Correo a Usuarios</h3>
       <form onSubmit={handleSubmit}>
         <div>

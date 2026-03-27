@@ -22,24 +22,14 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-const app = express();
-const port = 3001;
-const TEMPLATES_PATH = path.join(__dirname, 'templates.json');
-
-const CONTACTS_PATH = path.join(__dirname, 'contacts.json');
-
-app.use(cors());
-app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// --- Rutas Públicas ---
+// ... (el resto de tu configuración de Express)
 
 // Ruta para subir archivos (protegida para admin)
-app.post('/api/upload', verifyToken, upload.single('file'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send({ message: 'No se subió ningún archivo.' });
+app.post('/api/upload', verifyToken, upload.array('files', 10), (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).send({ message: 'No se subieron archivos.' });
   }
-  res.status(200).send({ message: 'Archivo subido correctamente', file: req.file });
+  res.status(200).send({ message: 'Archivos subidos correctamente', files: req.files });
 });
 
 // Ruta para obtener la lista de contenido

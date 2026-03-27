@@ -16,22 +16,22 @@ const DashboardPage = () => {
 
   return (
     <div style={{ maxWidth: '800px', margin: '5rem auto', padding: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1>Panel de Administrador</h1>
         <button onClick={handleLogout} style={{ height: 'fit-content' }}>Cerrar Sesión</button>
       </div>
-      <p>¡Bienvenido! Desde aquí podrás gestionar el contenido de tu web.</p>
       
-      <hr style={{ margin: '2rem 0' }} />
       <FileUpload token={token} />
-      <hr style={{ margin: '2rem 0' }} />
-
       <EmailSender token={token} />
+      
+      <div className="card">
+        <TemplateEditor />
+      </div>
+      
+      <div className="card">
+        <ContactList />
+      </div>
 
-      <hr style={{ margin: '2rem 0' }} />
-
-      <TemplateEditor />
-      <ContactList />
     </div>
   );
 };
