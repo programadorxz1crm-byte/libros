@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -6,6 +7,7 @@ const RegistrationForm = () => {
     email: '',
     whatsapp: '',
   });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -17,7 +19,7 @@ const RegistrationForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3001/api/register', {
+      const response = await fetch('/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -26,9 +28,7 @@ const RegistrationForm = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        console.log('Respuesta del servidor:', data.message);
-        alert('¡Gracias por registrarte! Recibirás tu regalo en tu correo.');
+        navigate('/dashboard'); // Redirigir al dashboard
       } else {
         alert('Hubo un error al registrar tus datos. Por favor, inténtalo de nuevo.');
       }

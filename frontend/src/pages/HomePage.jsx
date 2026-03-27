@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import RegistrationForm from '../components/RegistrationForm';
+import VideoPlayer from '../components/VideoPlayer';
 
 const HomePage = () => {
   return (
@@ -10,7 +11,7 @@ const HomePage = () => {
       <main>
         <section id="welcome">
           <h2>🎁 PORTAL DE BIENVENIDA: ÁNGELES SAGRADOS</h2>
-          {/* Aquí irá el video de bienvenida embebido */}
+          <VideoPlayer />
         </section>
         <section id="guide">
           <h2>📑 Guía del PDF "Tu Ritual, Tus Reglas"</h2>

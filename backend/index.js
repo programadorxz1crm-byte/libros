@@ -8,6 +8,19 @@ const { sendGiftEmail } = require('./utils/email');
 const { sendWhatsAppMessage } = require('./utils/whatsapp');
 const { ADMIN_USERNAME, ADMIN_PASSWORD_HASH, JWT_SECRET } = require('./config');
 const verifyToken = require('./middleware/auth');
+const multer = require('multer');
+
+// Configuración de Multer para guardar archivos
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ storage: storage });
 
 const app = express();
 const port = 3001;
@@ -17,6 +30,44 @@ const CONTACTS_PATH = path.join(__dirname, 'contacts.json');
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// --- Rutas Públicas ---
+
+// Ruta para subir archivos (protegida para admin)
+app.post('/api/upload', verifyToken, upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send({ message: 'No se subió ningún archivo.' });
+  }
+  res.status(200).send({ message: 'Archivo subido correctamente', file: req.file });
+});
+
+// Ruta para obtener la lista de contenido
+app.get('/api/content', (req, res) => {
+  const uploadDir = path.join(__dirname, 'uploads');
+  fs.readdir(uploadDir, (err, files) => {
+    if (err) {
+      return res.status(500).send({ message: 'Error al leer el contenido.' });
+    }
+    const content = files.map(file => {
+      const extension = path.extname(file).toLowerCase();
+      let type = 'file';
+      if (['.mp4', '.mov', '.avi'].includes(extension)) {
+        type = 'video';
+      } else if (['.mp3', '.wav', '.ogg'].includes(extension)) {
+        type = 'audio';
+      } else if (extension === '.pdf') {
+        type = 'pdf';
+      }
+      return {
+        name: file,
+        url: `/uploads/${file}`,
+        type: type
+      };
+    });
+    res.status(200).json(content);
+  });
+});
 
 // --- Rutas Públicas ---
 
