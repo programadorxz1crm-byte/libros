@@ -9,21 +9,23 @@ const HomePage = () => {
     <div>
       <Header />
       <main>
-        <section id="welcome">
+        <section id="welcome" className="card">
           <h2>🎁 PORTAL DE BIENVENIDA: ÁNGELES SAGRADOS</h2>
           <VideoPlayer />
         </section>
-        <section id="guide">
-          <h2>📑 Guía del PDF "Tu Ritual, Tus Reglas"</h2>
-          {/* Aquí irá la guía */}
-        </section>
-        <section id="gifts">
+
+        <section id="gifts" className="card">
           <h2>🎁 Tus Regalos Extra</h2>
           <p>Para obtener tus regalos, por favor, déjanos tus datos:</p>
           <RegistrationForm />
-          {/* Aquí irán los mandalas extra */}
         </section>
-        <section id="contact">
+
+        <section id="guide" className="card">
+          <h2>📑 Guía del PDF "Tu Ritual, Tus Reglas"</h2>
+          {/* Aquí irá la guía */}
+        </section>
+
+        <section id="contact" className="card">
           <h2>💖 Cierre y Conexión</h2>
           {/* Aquí irá la información de contacto y el botón de reseña */}
         </section>

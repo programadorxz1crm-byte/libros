@@ -27,6 +27,9 @@ main {
 
 section {
   margin-bottom: 3rem;
+}
+
+.card {
   background-color: #FFFFFF;
   padding: 2rem;
   border-radius: 8px;

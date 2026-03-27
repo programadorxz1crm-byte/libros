@@ -65,12 +65,11 @@ const RegistrationForm = () => {
       <div>
         <label htmlFor="whatsapp">WhatsApp:</label>
         <input
-          type="tel"
+          type="text"
           id="whatsapp"
           name="whatsapp"
           value={formData.whatsapp}
           onChange={handleChange}
-          required
         />
       </div>
       <button type="submit">Obtener Regalo</button>
