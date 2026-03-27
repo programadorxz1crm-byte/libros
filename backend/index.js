@@ -8,6 +8,7 @@ const { sendGiftEmail, sendCustomEmail } = require('./utils/email');
 const { sendWhatsAppMessage } = require('./utils/whatsapp');
 const { ADMIN_USERNAME, ADMIN_PASSWORD_HASH, JWT_SECRET } = require('./config');
 const { sql, createContactsTable, createTemplatesTable } = require('./utils/db');
+const { put, list, del } = require('@vercel/blob');
 
 // Crear las tablas de la base de datos al iniciar la aplicación
 (async () => {
@@ -43,11 +44,24 @@ const upload = multer({ storage: storage });
 // ... (el resto de tu configuración de Express)
 
 // Ruta para subir archivos (protegida para admin)
-app.post('/api/upload', verifyToken, upload.array('files', 10), (req, res) => {
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).send({ message: 'No se subieron archivos.' });
+app.post('/api/upload', verifyToken, async (req, res) => {
+  if (!req.body) {
+    return res.status(400).send('No se subieron archivos.');
   }
-  res.status(200).send({ message: 'Archivos subidos correctamente', files: req.files });
+  const { filename, body } = req.body;
+  const blob = await put(filename, body, { access: 'public' });
+  res.status(200).json(blob);
+});
+
+app.get('/api/files', verifyToken, async (req, res) => {
+  const { blobs } = await list();
+  res.status(200).json(blobs);
+});
+
+app.delete('/api/files', verifyToken, async (req, res) => {
+  const { urls } = req.body;
+  await del(urls);
+  res.status(200).send('Archivos eliminados');
 });
 
 // Ruta para obtener la lista de contenido

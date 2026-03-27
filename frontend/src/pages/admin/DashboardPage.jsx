@@ -4,14 +4,20 @@ import TemplateEditor from '../../components/admin/TemplateEditor';
 import ContactList from '../../components/admin/ContactList';
 import FileUpload from '../../components/admin/FileUpload';
 import EmailSender from '../../components/admin/EmailSender';
+import FileManager from '../../components/admin/FileManager';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('adminToken');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     navigate('/admin/login');
+  };
+
+  const handleUploadComplete = () => {
+    setRefreshTrigger(prev => prev + 1); // Cambiar el estado para forzar la recarga de FileManager
   };
 
   return (
@@ -21,7 +27,8 @@ const DashboardPage = () => {
         <button onClick={handleLogout} style={{ height: 'fit-content' }}>Cerrar Sesión</button>
       </div>
       
-      <FileUpload token={token} />
+      <FileUpload token={token} onUploadComplete={handleUploadComplete} />
+      <FileManager token={token} refreshTrigger={refreshTrigger} />
       <EmailSender token={token} />
       
       <div className="card">
