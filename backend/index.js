@@ -105,37 +105,31 @@ app.get('/api/content', (req, res) => {
 
 // --- Rutas Públicas ---
 
-app.post('/api/register', (req, res) => {
+app.post('/api/register', async (req, res) => {
   const { name, email, whatsapp } = req.body;
 
-  // --- Prioritize User Experience ---
-  // Respond immediately with success so the user gets redirected to the dashboard.
-  res.status(200).send({ message: 'Registro procesado, iniciando tareas en segundo plano.' });
+  try {
+    // 1. Ensure table exists and insert contact
+    await createContactsTable();
+    const result = await sql`INSERT INTO contacts (name, email, whatsapp) VALUES (${name}, ${email}, ${whatsapp}) ON CONFLICT (email) DO NOTHING`;
 
-  // --- Background Tasks ---
-  // Use a self-invoking async function to handle all background tasks.
-  (async () => {
-    try {
-      // 1. Ensure table exists and insert contact
-      await createContactsTable();
-      const result = await sql`INSERT INTO contacts (name, email, whatsapp) VALUES (${name}, ${email}, ${whatsapp}) ON CONFLICT (email) DO NOTHING`;
-
-      // Only send notifications if the user was newly inserted
-      if (result.count > 0) {
-        console.log(`Nuevo contacto guardado en segundo plano para: ${email}`);
-        // 2. Send notifications for new users
-        await sendGiftEmail(email, name);
-        await sendWhatsAppMessage(whatsapp, name);
-        console.log(`Notificaciones enviadas en segundo plano para: ${email}`);
-      } else {
-        console.log(`El contacto ${email} ya existía. No se enviaron notificaciones duplicadas.`);
-      }
-
-    } catch (error) {
-      // Log any errors that happen in the background. The user is already gone.
-      console.error('Error durante el procesamiento en segundo plano del registro:', error);
+    // 2. Send notifications only for new users
+    if (result.rowCount > 0) {
+      console.log(`Nuevo contacto guardado: ${email}. Enviando notificaciones...`);
+      await sendGiftEmail(email, name);
+      await sendWhatsAppMessage(whatsapp, name);
+      console.log(`Notificaciones enviadas para: ${email}`);
+    } else {
+      console.log(`El contacto ${email} ya existía. No se enviaron notificaciones duplicadas.`);
     }
-  })();
+
+    // 3. Respond with success
+    res.status(200).send({ message: 'Registro procesado con éxito.' });
+
+  } catch (error) {
+    console.error('Error en el proceso de registro:', error);
+    res.status(500).send({ message: 'Hubo un error interno al procesar tu registro.' });
+  }
 });
 
 // --- Rutas de Admin ---
