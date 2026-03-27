@@ -1,83 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 
 const UserDashboard = () => {
   const [content, setContent] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
         const response = await fetch('/api/content');
-        if (!response.ok) {
-          throw new Error('Error al obtener el contenido');
-        }
         const data = await response.json();
-        if (Array.isArray(data)) {
-          setContent(data);
-        }
+        setContent(data);
       } catch (error) {
-        console.error('Error al cargar el contenido:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error fetching content:', error);
       }
     };
-
     fetchContent();
   }, []);
 
-  const audios = content.filter(item => item.type === 'audio');
-  const pdfs = content.filter(item => item.type === 'pdf');
-
   return (
-    <div>
-      <Header />
-      <main>
-        <section className="card">
-          <h1>Tus Regalos</h1>
-          <p>¡Gracias por registrarte! Aquí tienes acceso a tu contenido exclusivo.</p>
-
-          {loading ? (
-            <p>Cargando contenido...</p>
-          ) : (
-            <>
-              <hr style={{ margin: '2rem 0' }} />
-              <h2>Audios</h2>
-              {audios.length > 0 ? (
-                <ul>
-                  {audios.map(audio => (
-                    <li key={audio.name}>
-                      <p>{audio.name.split('-').slice(1).join('-')}</p>
-                      <audio controls src={audio.url}>Tu navegador no soporta el elemento de audio.</audio>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No hay audios disponibles en este momento.</p>
-              )}
-
-              <hr style={{ margin: '2rem 0' }} />
-
-              <h2>PDFs</h2>
-              {pdfs.length > 0 ? (
-                <ul>
-                  {pdfs.map(pdf => (
-                    <li key={pdf.name}>
-                      <a href={pdf.url} target="_blank" rel="noopener noreferrer">
-                        {pdf.name.split('-').slice(1).join('-')}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No hay PDFs disponibles en este momento.</p>
-              )}
-            </>
-          )}
-        </section>
-      </main>
-      <Footer />
+    <div style={{ maxWidth: '800px', margin: '5rem auto', padding: '2rem' }}>
+      <h1 style={{ textAlign: 'center', color: '#A084C4' }}>Tus Regalos Especiales</h1>
+      <p style={{ textAlign: 'center', marginBottom: '3rem' }}>Aquí tienes el contenido exclusivo que hemos preparado para ti. ¡Disfrútalo!</p>
+      
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
+        {content.map((item, index) => (
+          <div key={index} className="card" style={{ padding: '1.5rem' }}>
+            <h3 style={{ color: '#A084C4' }}>{item.name}</h3>
+            <p>Tipo: {item.type}</p>
+            <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ 
+              display: 'inline-block', 
+              marginTop: '1rem', 
+              padding: '10px 15px', 
+              backgroundColor: '#A084C4', 
+              color: 'white', 
+              textDecoration: 'none', 
+              borderRadius: '5px' 
+            }}>Descargar o Ver</a>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
