@@ -3,12 +3,12 @@ const { sql } = require('@vercel/postgres');
 
 // ATENCIÓN: Reemplazar con los datos correctos del servidor SMTP
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT || 465,
-  secure: true, // true para el puerto 465
+  host: 'mail.spacemail.com',
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: 'libro@angelessagrado.shop',
+    pass: 'g(8ypCp1',
   },
   tls: {
     rejectUnauthorized: false,
@@ -40,7 +40,7 @@ const sendGiftEmail = async (recipientEmail, recipientName) => {
 
 const sendCustomEmail = async (to, subject, html) => {
   const mailOptions = {
-    from: `"Ángeles Sagrados" <${process.env.SMTP_USER}>`,
+    from: `"Ángeles Sagrados" <libro@angelessagrado.shop>`,
     to: to,
     subject: subject,
     html: html,
