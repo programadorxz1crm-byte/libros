@@ -168,22 +168,8 @@ app.get('/api/admin/contacts', verifyToken, (req, res) => {
 
 // Rutas para la configuración del video de bienvenida
 app.get('/api/settings', (req, res) => {
-  fs.readFile(SETTINGS_PATH, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).send({ message: 'Error al leer la configuración.' });
-    }
-    res.json(JSON.parse(data));
-  });
-});
-
-app.post('/api/admin/settings', verifyToken, (req, res) => {
-  const { welcomeVideoUrl } = req.body;
-  fs.writeFile(SETTINGS_PATH, JSON.stringify({ welcomeVideoUrl }, null, 2), (err) => {
-    if (err) {
-      return res.status(500).send({ message: 'Error al guardar la configuración.' });
-    }
-    res.status(200).send({ message: 'Configuración guardada correctamente.' });
-  });
+  // Devuelve la URL desde la variable de entorno
+  res.status(200).json({ welcomeVideoUrl: process.env.WELCOME_VIDEO_URL || '' });
 });
 
 app.post('/api/admin/bulk-whatsapp', verifyToken, async (req, res) => {
