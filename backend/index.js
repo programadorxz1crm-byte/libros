@@ -7,7 +7,13 @@ const path = require('path');
 const { sendGiftEmail, sendCustomEmail } = require('./utils/email');
 const { sendWhatsAppMessage } = require('./utils/whatsapp');
 const { ADMIN_USERNAME, ADMIN_PASSWORD_HASH, JWT_SECRET } = require('./config');
-const { sql, createContactsTable } = require('./utils/db');
+const { sql, createContactsTable, createTemplatesTable } = require('./utils/db');
+
+// Crear las tablas de la base de datos al iniciar la aplicación
+(async () => {
+  await createContactsTable();
+  await createTemplatesTable();
+})();
 const verifyToken = require('./middleware/auth');
 const multer = require('multer');
 
@@ -133,13 +139,17 @@ app.post('/api/admin/login', (req, res) => {
 
 // --- Rutas Protegidas de Admin ---
 
-app.get('/api/admin/templates', verifyToken, (req, res) => {
-  fs.readFile(TEMPLATES_PATH, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).send({ message: 'Error al leer las plantillas' });
+app.get('/api/admin/templates', verifyToken, async (req, res) => {
+  try {
+    const { rows } = await sql`SELECT email_template, whatsapp_template FROM templates WHERE id = 1`;
+    if (rows.length === 0) {
+      return res.status(404).send({ message: 'No se encontraron plantillas.' });
     }
-    res.json(JSON.parse(data));
-  });
+    res.json({ email: rows[0].email_template, whatsapp: rows[0].whatsapp_template });
+  } catch (error) {
+    console.error('Error al obtener las plantillas:', error);
+    res.status(500).send({ message: 'Error al leer las plantillas' });
+  }
 });
 
 app.post('/api/admin/send-email', verifyToken, async (req, res) => {
@@ -207,28 +217,19 @@ app.post('/api/admin/bulk-whatsapp', verifyToken, async (req, res) => {
   });
 });
 
-app.put('/api/admin/templates', verifyToken, (req, res) => {
-  const { email, whatsapp, whatsappApiToken } = req.body;
-  if (!email || !whatsapp) { // El token puede ser opcional al principio
-    return res.status(400).send({ message: 'Faltan datos de las plantillas' });
+app.post('/api/admin/templates', verifyToken, async (req, res) => {
+  const { email, whatsapp } = req.body;
+  try {
+    await sql`
+      UPDATE templates
+      SET email_template = ${email}, whatsapp_template = ${whatsapp}
+      WHERE id = 1;
+    `;
+    res.status(200).send({ message: 'Plantillas guardadas correctamente en la base de datos.' });
+  } catch (error) {
+    console.error('Error al guardar las plantillas:', error);
+    res.status(500).send({ message: 'Error al guardar las plantillas' });
   }
-
-  // Leemos el contenido actual para no perder otros campos que puedan existir
-  fs.readFile(TEMPLATES_PATH, 'utf8', (err, data) => {
-    if (err && err.code !== 'ENOENT') { // Ignoramos si el archivo no existe la primera vez
-      return res.status(500).send({ message: 'Error al leer las plantillas existentes' });
-    }
-
-    const currentTemplates = data ? JSON.parse(data) : {};
-    const newTemplates = JSON.stringify({ ...currentTemplates, email, whatsapp, whatsappApiToken }, null, 2);
-
-    fs.writeFile(TEMPLATES_PATH, newTemplates, 'utf8', (err) => {
-      if (err) {
-        return res.status(500).send({ message: 'Error al guardar las plantillas' });
-      }
-      res.send({ message: 'Plantillas y token actualizados correctamente' });
-    });
-  });
 });
 
 

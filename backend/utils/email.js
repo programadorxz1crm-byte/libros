@@ -1,35 +1,33 @@
 const nodemailer = require('nodemailer');
-const fs = require('fs');
-const path = require('path');
-
-const TEMPLATES_PATH = path.join(__dirname, '../templates.json');
+const { sql } = require('@vercel/postgres');
 
 // ATENCIÓN: Reemplazar con los datos correctos del servidor SMTP
 const transporter = nodemailer.createTransport({
-  host: 'mail.spacemail.com', // <-- Por favor, confirma si este es el host SMTP
-  port: 465, // <-- Por favor, confirma si este es el puerto SMTP (normalmente 465 para SSL o 587 para TLS)
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT || 465,
   secure: true, // true para el puerto 465
   auth: {
-    user: 'libro@angelessagrado.shop',
-    pass: 'g(8ypCp1', // La contraseña que me proporcionaste
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
   tls: {
-    // No fallar en certificados autofirmados (común en algunos hostings)
     rejectUnauthorized: false,
   },
 });
 
 const sendGiftEmail = async (recipientEmail, recipientName) => {
   try {
-    const templatesData = fs.readFileSync(TEMPLATES_PATH, 'utf8');
-    const templates = JSON.parse(templatesData);
-    const emailHtml = templates.email.replace(/\${name}/g, recipientName);
+    const { rows } = await sql`SELECT email_template FROM templates WHERE id = 1`;
+    if (rows.length === 0) {
+      throw new Error('No se encontró la plantilla de correo en la base de datos.');
+    }
+    const emailHtml = rows[0].email_template.replaceAll('${name}', recipientName);
 
     const subject = '🎁 ¡Tu Regalo Especial de Ángeles Sagrados!';
     return await sendCustomEmail(recipientEmail, subject, emailHtml);
 
   } catch (error) {
-    console.error('Error al leer o procesar la plantilla de correo:', error);
+    console.error('Error al leer o procesar la plantilla de correo desde la BD:', error);
     // Fallback a un correo genérico si la plantilla falla
     const fallbackHtml = `
       <h1>¡Hola, ${recipientName}!</h1>
