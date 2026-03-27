@@ -10,6 +10,10 @@ const { ADMIN_USERNAME, ADMIN_PASSWORD_HASH, JWT_SECRET } = require('./config');
 const verifyToken = require('./middleware/auth');
 const multer = require('multer');
 
+const CONTACTS_PATH = path.join(__dirname, 'contacts.json');
+const TEMPLATES_PATH = path.join(__dirname, 'templates.json');
+const SETTINGS_PATH = path.join(__dirname, 'settings.json');
+
 // Configuración de Multer para guardar archivos
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -159,6 +163,26 @@ app.get('/api/admin/contacts', verifyToken, (req, res) => {
       return res.status(500).send({ message: 'Error al leer los contactos' });
     }
     res.json(JSON.parse(data));
+  });
+});
+
+// Rutas para la configuración del video de bienvenida
+app.get('/api/settings', (req, res) => {
+  fs.readFile(SETTINGS_PATH, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).send({ message: 'Error al leer la configuración.' });
+    }
+    res.json(JSON.parse(data));
+  });
+});
+
+app.post('/api/admin/settings', verifyToken, (req, res) => {
+  const { welcomeVideoUrl } = req.body;
+  fs.writeFile(SETTINGS_PATH, JSON.stringify({ welcomeVideoUrl }, null, 2), (err) => {
+    if (err) {
+      return res.status(500).send({ message: 'Error al guardar la configuración.' });
+    }
+    res.status(200).send({ message: 'Configuración guardada correctamente.' });
   });
 });
 

@@ -5,20 +5,26 @@ const VideoPlayer = () => {
   const [videoUrl, setVideoUrl] = useState('');
 
   useEffect(() => {
-    const fetchLatestVideo = async () => {
+    const fetchVideoUrl = async () => {
       try {
-        const response = await fetch('/api/content');
+        const response = await fetch('/api/settings');
         const data = await response.json();
-        const latestVideo = data.find(item => item.type === 'video');
-        if (latestVideo) {
-          setVideoUrl(latestVideo.url);
+        if (data.welcomeVideoUrl) {
+          // Convertir URL de YouTube a formato de inserción (embed)
+          const url = new URL(data.welcomeVideoUrl);
+          if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+            const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
+            setVideoUrl(`https://www.youtube.com/embed/${videoId}`);
+          } else {
+            setVideoUrl(data.welcomeVideoUrl);
+          }
         }
       } catch (error) {
-        console.error('Error al cargar el video:', error);
+        console.error('Error al cargar la URL del video:', error);
       }
     };
 
-    fetchLatestVideo();
+    fetchVideoUrl();
   }, []);
 
   if (!videoUrl) {
@@ -27,13 +33,15 @@ const VideoPlayer = () => {
 
   return (
     <div className="video-container">
-      <video controls width="100%">
-        <source src={videoUrl} type="video/mp4" />
-        Tu navegador no soporta la etiqueta de video.
-      </video>
-      <div className="progress-bar-container">
-        <div className="progress-bar-animated"></div>
-      </div>
+      <iframe 
+        width="100%" 
+        src={videoUrl} 
+        title="Video de Bienvenida"
+        frameBorder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowFullScreen
+        style={{ aspectRatio: '16/9' }}
+      ></iframe>
     </div>
   );
 };

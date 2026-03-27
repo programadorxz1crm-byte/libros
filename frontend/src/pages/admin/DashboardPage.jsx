@@ -4,6 +4,7 @@ import TemplateEditor from '../../components/admin/TemplateEditor';
 import ContactList from '../../components/admin/ContactList';
 import FileUpload from '../../components/admin/FileUpload';
 import EmailSender from '../../components/admin/EmailSender';
+import VideoManager from '../../components/admin/VideoManager';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const DashboardPage = () => {
         <button onClick={handleLogout} style={{ height: 'fit-content' }}>Cerrar Sesión</button>
       </div>
       
+      <VideoManager token={token} />
       <FileUpload token={token} />
       <EmailSender token={token} />
       
