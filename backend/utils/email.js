@@ -40,7 +40,7 @@ const sendGiftEmail = async (recipientEmail, recipientName) => {
 
 const sendCustomEmail = async (to, subject, html) => {
   const mailOptions = {
-    from: `"Ángeles Sagrados" <${EMAIL_USER}>`,
+    from: `"Ángeles Sagrados" <${process.env.SMTP_USER}>`,
     to: to,
     subject: subject,
     html: html,
