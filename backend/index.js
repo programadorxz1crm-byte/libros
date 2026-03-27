@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
-const { sendGiftEmail } = require('./utils/email');
+const { sendGiftEmail, sendCustomEmail } = require('./utils/email');
 const { sendWhatsAppMessage } = require('./utils/whatsapp');
 const { ADMIN_USERNAME, ADMIN_PASSWORD_HASH, JWT_SECRET } = require('./config');
 const verifyToken = require('./middleware/auth');
@@ -130,6 +130,22 @@ app.get('/api/admin/templates', verifyToken, (req, res) => {
     }
     res.json(JSON.parse(data));
   });
+});
+
+app.post('/api/admin/send-email', verifyToken, async (req, res) => {
+  const { to, subject, body } = req.body;
+
+  if (!to || !subject || !body) {
+    return res.status(400).send({ message: 'Faltan datos: se requiere destinatario, asunto y cuerpo del correo.' });
+  }
+
+  const result = await sendCustomEmail(to, subject, body);
+
+  if (result.success) {
+    res.status(200).send({ message: 'Correo enviado correctamente.' });
+  } else {
+    res.status(500).send({ message: 'Error al enviar el correo.', error: result.error });
+  }
 });
 
 app.get('/api/admin/contacts', verifyToken, (req, res) => {

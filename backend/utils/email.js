@@ -19,27 +19,30 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendGiftEmail = async (to, name) => {
+const sendGiftEmail = async (recipientEmail, recipientName) => {
+  const subject = '🎁 ¡Tu Regalo Especial de Ángeles Sagrados!';
+  const html = `
+    <h1>¡Hola, ${recipientName}!</h1>
+    <p>Gracias por registrarte. Como prometimos, aquí tienes tu regalo especial.</p>
+    <p>Accede a tu contenido exclusivo haciendo clic en el siguiente enlace:</p>
+    <a href="https://libros-mu.vercel.app/dashboard">Acceder a mis regalos</a>
+    <p>Con amor y luz,</p>
+    <p>El equipo de Ángeles Sagrados</p>
+  `;
+  return await sendCustomEmail(recipientEmail, subject, html);
+};
+
+const sendCustomEmail = async (to, subject, html) => {
+  const mailOptions = {
+    from: `"Ángeles Sagrados" <${EMAIL_USER}>`,
+    to: to,
+    subject: subject,
+    html: html,
+  };
+
   try {
-    const templatesData = fs.readFileSync(TEMPLATES_PATH, 'utf8');
-    const templates = JSON.parse(templatesData);
-    const emailHtml = templates.email.replace(/\${name}/g, name);
-
-    const mailOptions = {
-      from: '"Ángeles Sagrados" <libro@angelessagrado.shop>',
-      to: to,
-      subject: '🎁 Tu Regalo de Ángeles Sagrados',
-      html: emailHtml,
-      // TODO: Añadir los mandalas como archivos adjuntos cuando estén disponibles
-      // attachments: [
-      //   { filename: 'mandala1.pdf', path: 'ruta/al/mandala1.pdf' },
-      //   { filename: 'mandala2.pdf', path: 'ruta/al/mandala2.pdf' },
-      //   { filename: 'mandala3.pdf', path: 'ruta/al/mandala3.pdf' },
-      // ],
-    };
-
-    let info = await transporter.sendMail(mailOptions);
-    console.log('Correo enviado: ' + info.response);
+    await transporter.sendMail(mailOptions);
+    console.log('Correo enviado a:', to);
     return { success: true };
   } catch (error) {
     console.error('Error al enviar el correo:', error);
@@ -47,4 +50,4 @@ const sendGiftEmail = async (to, name) => {
   }
 };
 
-module.exports = { sendGiftEmail };
+module.exports = { sendGiftEmail, sendCustomEmail };

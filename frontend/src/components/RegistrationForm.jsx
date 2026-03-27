@@ -28,6 +28,7 @@ const RegistrationForm = () => {
       });
 
       if (response.ok) {
+        alert('¡Gracias por registrarte! Revisa tu correo para acceder a tus regalos.');
         navigate('/dashboard'); // Redirigir al dashboard
       } else {
         alert('Hubo un error al registrar tus datos. Por favor, inténtalo de nuevo.');

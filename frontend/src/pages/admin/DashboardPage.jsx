@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import TemplateEditor from '../../components/admin/TemplateEditor';
 import ContactList from '../../components/admin/ContactList';
 import FileUpload from '../../components/admin/FileUpload';
+import EmailSender from '../../components/admin/EmailSender';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -23,6 +24,10 @@ const DashboardPage = () => {
       
       <hr style={{ margin: '2rem 0' }} />
       <FileUpload token={token} />
+      <hr style={{ margin: '2rem 0' }} />
+
+      <EmailSender token={token} />
+
       <hr style={{ margin: '2rem 0' }} />
 
       <TemplateEditor />
