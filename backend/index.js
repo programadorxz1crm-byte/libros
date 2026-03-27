@@ -83,9 +83,9 @@ app.post('/api/register', async (req, res) => {
       return console.error('Error al leer los contactos.');
     }
     const contacts = data ? JSON.parse(data) : [];
-    // Evitar duplicados
-    if (!contacts.some(contact => contact.whatsapp === whatsapp)) {
-      contacts.push({ name, whatsapp });
+    // Evitar duplicados por email o whatsapp
+    if (!contacts.some(contact => contact.email === email || contact.whatsapp === whatsapp)) {
+      contacts.push({ name, email, whatsapp });
       fs.writeFile(CONTACTS_PATH, JSON.stringify(contacts, null, 2), (err) => {
         if (err) return console.error('Error al guardar el contacto.');
         console.log('Nuevo contacto guardado:', { name, whatsapp });
