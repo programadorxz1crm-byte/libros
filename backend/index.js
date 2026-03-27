@@ -10,7 +10,7 @@ const { ADMIN_USERNAME, ADMIN_PASSWORD_HASH, JWT_SECRET } = require('./config');
 const { sql, createContactsTable } = require('./utils/db');
 
 // Crear la tabla de contactos al iniciar la aplicación
-createContactsTable();
+// createContactsTable(); // Movido dentro del handler para más seguridad
 const verifyToken = require('./middleware/auth');
 const multer = require('multer');
 
@@ -81,7 +81,7 @@ app.get('/api/content', (req, res) => {
 
 // --- Rutas Públicas ---
 
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', (req, res) => {
   const { name, email, whatsapp } = req.body;
 
   // --- Prioritize User Experience ---
@@ -89,29 +89,24 @@ app.post('/api/register', async (req, res) => {
   res.status(200).send({ message: 'Registro procesado, iniciando tareas en segundo plano.' });
 
   // --- Background Tasks ---
-  // These tasks will run after the response has been sent to the user.
+  // Use a self-invoking async function to handle all background tasks.
+  (async () => {
+    try {
+      // 1. Ensure table exists and insert contact
+      await createContactsTable();
+      await sql`INSERT INTO contacts (name, email, whatsapp) VALUES (${name}, ${email}, ${whatsapp}) ON CONFLICT (email) DO NOTHING`;
+      console.log(`Contacto guardado en segundo plano para: ${email}`);
 
-  // 1. Guardar contacto en la base de datos
-  try {
-    await sql`INSERT INTO contacts (name, email, whatsapp) VALUES (${name}, ${email}, ${whatsapp}) ON CONFLICT (email) DO NOTHING`;
-    console.log(`Contacto intentado guardar para: ${email}`);
-  } catch (error) {
-    console.error('Error en segundo plano al guardar en la base de datos:', error);
-  }
+      // 2. Send notifications
+      await sendGiftEmail(email, name);
+      await sendWhatsAppMessage(whatsapp, name);
+      console.log(`Notificaciones enviadas en segundo plano para: ${email}`);
 
-  // 2. Enviar correo de bienvenida
-  sendGiftEmail(email, name).then(result => {
-    if (!result.success) {
-      console.error('Error en segundo plano al enviar el correo de bienvenida:', result.error);
+    } catch (error) {
+      // Log any errors that happen in the background. The user is already gone.
+      console.error('Error durante el procesamiento en segundo plano del registro:', error);
     }
-  });
-
-  // 3. Enviar mensaje de WhatsApp
-  sendWhatsAppMessage(whatsapp, name).then(result => {
-    if (!result.success) {
-      console.error('Error en segundo plano al enviar el WhatsApp de bienvenida:', result.error);
-    }
-  });
+  })();
 });
 
 // --- Rutas de Admin ---
