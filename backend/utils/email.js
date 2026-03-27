@@ -20,16 +20,24 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendGiftEmail = async (recipientEmail, recipientName) => {
-  const subject = '🎁 ¡Tu Regalo Especial de Ángeles Sagrados!';
-  const html = `
-    <h1>¡Hola, ${recipientName}!</h1>
-    <p>Gracias por registrarte. Como prometimos, aquí tienes tu regalo especial.</p>
-    <p>Accede a tu contenido exclusivo haciendo clic en el siguiente enlace:</p>
-    <a href="https://libros-mu.vercel.app/dashboard">Acceder a mis regalos</a>
-    <p>Con amor y luz,</p>
-    <p>El equipo de Ángeles Sagrados</p>
-  `;
-  return await sendCustomEmail(recipientEmail, subject, html);
+  try {
+    const templatesData = fs.readFileSync(TEMPLATES_PATH, 'utf8');
+    const templates = JSON.parse(templatesData);
+    const emailHtml = templates.email.replace(/\${name}/g, recipientName);
+
+    const subject = '🎁 ¡Tu Regalo Especial de Ángeles Sagrados!';
+    return await sendCustomEmail(recipientEmail, subject, emailHtml);
+
+  } catch (error) {
+    console.error('Error al leer o procesar la plantilla de correo:', error);
+    // Fallback a un correo genérico si la plantilla falla
+    const fallbackHtml = `
+      <h1>¡Hola, ${recipientName}!</h1>
+      <p>Gracias por registrarte. Accede a tus regalos aquí:</p>
+      <a href="https://libros-mu.vercel.app/dashboard">Acceder a mis regalos</a>
+    `;
+    return await sendCustomEmail(recipientEmail, '🎁 ¡Tu Regalo Especial de Ángeles Sagrados!', fallbackHtml);
+  }
 };
 
 const sendCustomEmail = async (to, subject, html) => {
