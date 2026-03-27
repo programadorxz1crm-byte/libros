@@ -84,26 +84,34 @@ app.get('/api/content', (req, res) => {
 app.post('/api/register', async (req, res) => {
   const { name, email, whatsapp } = req.body;
 
+  // --- Prioritize User Experience ---
+  // Respond immediately with success so the user gets redirected to the dashboard.
+  res.status(200).send({ message: 'Registro procesado, iniciando tareas en segundo plano.' });
+
+  // --- Background Tasks ---
+  // These tasks will run after the response has been sent to the user.
+
+  // 1. Guardar contacto en la base de datos
   try {
-    // Guardar contacto en la base de datos
     await sql`INSERT INTO contacts (name, email, whatsapp) VALUES (${name}, ${email}, ${whatsapp}) ON CONFLICT (email) DO NOTHING`;
-
-    // Intentar enviar correo y WhatsApp, pero no bloquear el registro si fallan.
-    sendGiftEmail(email, name).then(result => {
-      if (!result.success) console.error('Error al enviar el correo de bienvenida:', result.error);
-    });
-
-    sendWhatsAppMessage(whatsapp, name).then(result => {
-      if (!result.success) console.error('Error al enviar el WhatsApp de bienvenida:', result.error);
-    });
-
-    // Responder inmediatamente con éxito para que el usuario sea redirigido.
-    res.status(200).send({ message: 'Registro procesado.' });
-
+    console.log(`Contacto intentado guardar para: ${email}`);
   } catch (error) {
-    console.error('Error en el proceso de registro:', error);
-    res.status(500).send({ message: 'Hubo un error interno al procesar tu registro.' });
+    console.error('Error en segundo plano al guardar en la base de datos:', error);
   }
+
+  // 2. Enviar correo de bienvenida
+  sendGiftEmail(email, name).then(result => {
+    if (!result.success) {
+      console.error('Error en segundo plano al enviar el correo de bienvenida:', result.error);
+    }
+  });
+
+  // 3. Enviar mensaje de WhatsApp
+  sendWhatsAppMessage(whatsapp, name).then(result => {
+    if (!result.success) {
+      console.error('Error en segundo plano al enviar el WhatsApp de bienvenida:', result.error);
+    }
+  });
 });
 
 // --- Rutas de Admin ---
