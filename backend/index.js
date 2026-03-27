@@ -81,37 +81,38 @@ app.post('/api/register', async (req, res) => {
   console.log('Datos recibidos:', req.body);
   const { name, email, whatsapp } = req.body;
 
-  // Guardar contacto
+  // Guardar contacto (Desactivado temporalmente por incompatibilidad con Vercel)
+  /*
   fs.readFile(CONTACTS_PATH, 'utf8', (err, data) => {
     if (err && err.code !== 'ENOENT') {
       return console.error('Error al leer los contactos.');
     }
     const contacts = data ? JSON.parse(data) : [];
-    // Evitar duplicados por email o whatsapp
     if (!contacts.some(contact => contact.email === email || contact.whatsapp === whatsapp)) {
       contacts.push({ name, email, whatsapp });
       fs.writeFile(CONTACTS_PATH, JSON.stringify(contacts, null, 2), (err) => {
-        if (err) return console.error('Error al guardar el contacto.');
-        console.log('Nuevo contacto guardado:', { name, whatsapp });
+        if (err) return console.error('Error al guardar el contacto en Vercel:', err);
+        console.log('Nuevo contacto guardado:', { name, email, whatsapp });
       });
     }
   });
+  */
 
-  const emailResult = await sendGiftEmail(email, name);
-  if (!emailResult.success) {
-    return res.status(500).send({ message: 'Error al enviar el correo', error: emailResult.error });
-  }
+  // Intentar enviar correo y WhatsApp, pero no bloquear el registro si fallan.
+  sendGiftEmail(email, name).then(result => {
+    if (!result.success) {
+      console.error('Error al enviar el correo de bienvenida:', result.error);
+    }
+  });
 
-  const whatsappResult = await sendWhatsAppMessage(whatsapp, name);
-  if (!whatsappResult.success) {
-    console.error('El mensaje de WhatsApp no se pudo enviar, pero el correo sí.');
-    return res.status(200).send({ 
-      message: 'Datos recibidos y correo enviado, pero hubo un problema con WhatsApp.', 
-      whatsapp_error: whatsappResult.error 
-    });
-  }
+  sendWhatsAppMessage(whatsapp, name).then(result => {
+    if (!result.success) {
+      console.error('Error al enviar el WhatsApp de bienvenida:', result.error);
+    }
+  });
 
-  res.status(200).send({ message: 'Datos recibidos, correo y WhatsApp enviados correctamente' });
+  // Responder inmediatamente con éxito para que el usuario sea redirigido.
+  res.status(200).send({ message: 'Registro procesado.' });
 });
 
 // --- Rutas de Admin ---
