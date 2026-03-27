@@ -51,7 +51,7 @@ const sendCustomEmail = async (to, subject, html) => {
     console.log('Correo enviado a:', to);
     return { success: true };
   } catch (error) {
-    console.error('Error al enviar el correo:', error);
+    console.error('Error detallado al enviar el correo:', error);
     return { success: false, error };
   }
 };
