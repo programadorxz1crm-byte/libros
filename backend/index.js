@@ -7,7 +7,7 @@ const path = require('path');
 const { sendGiftEmail, sendCustomEmail } = require('./utils/email');
 const { sendWhatsAppMessage } = require('./utils/whatsapp');
 const { ADMIN_USERNAME, ADMIN_PASSWORD_HASH, JWT_SECRET } = require('./config');
-const { pool, createContactsTable } = require('./utils/db');
+const { sql, createContactsTable } = require('./utils/db');
 
 // Crear la tabla de contactos al iniciar la aplicación
 createContactsTable();
@@ -86,8 +86,7 @@ app.post('/api/register', async (req, res) => {
 
   try {
     // Guardar contacto en la base de datos
-    const insertQuery = 'INSERT INTO contacts (name, email, whatsapp) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING';
-    await pool.query(insertQuery, [name, email, whatsapp]);
+    await sql`INSERT INTO contacts (name, email, whatsapp) VALUES (${name}, ${email}, ${whatsapp}) ON CONFLICT (email) DO NOTHING`;
 
     // Intentar enviar correo y WhatsApp, pero no bloquear el registro si fallan.
     sendGiftEmail(email, name).then(result => {
@@ -149,8 +148,8 @@ app.post('/api/admin/send-email', verifyToken, async (req, res) => {
 
 app.get('/api/admin/contacts', verifyToken, async (req, res) => {
   try {
-    const result = await pool.query('SELECT name, email, whatsapp FROM contacts ORDER BY created_at DESC');
-    res.json(result.rows);
+    const { rows } = await sql`SELECT name, email, whatsapp FROM contacts ORDER BY created_at DESC`;
+    res.json(rows);
   } catch (error) {
     console.error('Error al obtener los contactos:', error);
     res.status(500).send({ message: 'Error al leer los contactos' });
