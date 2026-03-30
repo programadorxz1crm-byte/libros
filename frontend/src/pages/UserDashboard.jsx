@@ -72,33 +72,32 @@ const UserDashboard = () => {
       {/* Meditaciones */}
       <div className="card">
           <h2 style={{fontFamily: 'Playfair Display, serif', color: '#A084C4'}}>🧘‍♀️ Meditaciones que te Acompañarán</h2>
-          <p>Aquí tienes dos meditaciones para empezar. La primera para conectar con tu intención y la segunda para cerrar tu ritual.</p>
           <div className="meditation-container" style={{margin: '1.5rem 0', textAlign: 'center'}}>
-              <h4 style={{color: '#A084C4'}}>Meditación de Intención</h4>
-              <iframe 
-                  width="560" 
-                  height="315" 
-                  src="https://www.youtube.com/embed/g_sf_p3O3B4"
-                  title="Meditación Guiada para Empezar el Día" 
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                  style={{borderRadius: '8px', maxWidth: '100%'}}>
-              </iframe>
-          </div>
-          <div className="meditation-container" style={{margin: '1.5rem 0', textAlign: 'center'}}>
-              <h4 style={{color: '#A084C4'}}>Meditación de Cierre</h4>
-              <iframe 
-                  width="560" 
-                  height="315" 
-                  src="https://www.youtube.com/embed/c5r4_G_r7sI"
-                  title="Meditación Guiada para Dormir Profundamente" 
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                  style={{borderRadius: '8px', maxWidth: '100%'}}>
-              </iframe>
-          </div>
+               <h4 style={{color: '#A084C4'}}>Meditación de Intención</h4>
+               <iframe 
+                   width="560" 
+                   height="315" 
+                   src="https://www.youtube.com/embed/g_sf_p3O3B4"
+                   title="Meditación Guiada para Empezar el Día" 
+                   frameBorder="0" 
+                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                   allowFullScreen
+                   style={{borderRadius: '8px', maxWidth: '100%'}}>
+               </iframe>
+           </div>
+           <div className="meditation-container" style={{margin: '1.5rem 0', textAlign: 'center'}}>
+               <h4 style={{color: '#A084C4'}}>Meditación de Cierre</h4>
+               <iframe 
+                   width="560" 
+                   height="315" 
+                   src="https://www.youtube.com/embed/c5r4_G_r7sI"
+                   title="Meditación Guiada para Dormir Profundamente" 
+                   frameBorder="0" 
+                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                   allowFullScreen
+                   style={{borderRadius: '8px', maxWidth: '100%'}}>
+               </iframe>
+           </div>
       </div>
 
       {/* Cierre y Conexión */}
