@@ -1,5 +1,4 @@
 {
-  "name": "libros-sagrados-app",
   "version": 2,
   "builds": [
     {
@@ -9,7 +8,7 @@
     {
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "config": { "distDir": "build" }
     }
   ],
   "rewrites": [
