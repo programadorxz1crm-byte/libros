@@ -65,7 +65,7 @@ app.delete('/api/files', verifyToken, async (req, res) => {
 });
 
 // Ruta para obtener la lista de contenido
-app.get('/api/content', async (req, res) => {
+app.get('/api/user/content', async (req, res) => {
   const { authorization } = req.headers;
   if (!authorization) {
     return res.status(401).send({ message: 'No autorizado.' });
@@ -127,7 +127,7 @@ app.post('/api/admin/login', (req, res) => {
   }
 });
 
-app.post('/api/user/login', async (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { email } = req.body;
   if (!email) {
     return res.status(400).send({ message: 'El correo es obligatorio.' });
@@ -207,7 +207,7 @@ app.post('/api/admin/send-email', verifyToken, async (req, res) => {
 
 app.get('/api/admin/contacts', verifyToken, async (req, res) => {
   try {
-    const { rows } = await sql`SELECT name, email, whatsapp FROM contacts ORDER BY created_at DESC`;
+    const { rows } = await sql`SELECT name, email, whatsapp, profile_picture_url FROM contacts ORDER BY created_at DESC`;
     res.json(rows);
   } catch (error) {
     console.error('Error al obtener los contactos:', error);

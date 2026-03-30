@@ -19,7 +19,7 @@ const UserDashboard = () => {
     const fetchContent = async () => {
       const token = localStorage.getItem('userToken');
       try {
-        const response = await fetch('/api/content', {
+        const response = await fetch('/api/user/content', {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         if (response.ok) {
@@ -66,8 +66,9 @@ const UserDashboard = () => {
     setMessage('Subiendo foto...');
     const token = localStorage.getItem('userToken');
     try {
-      const response = await fetch(`/api/user/profile-picture?filename=${file.name}&token=${token}`, {
+      const response = await fetch(`/api/user/profile-picture?filename=${file.name}`, {
         method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
         body: file,
       });
       const data = await response.json();
