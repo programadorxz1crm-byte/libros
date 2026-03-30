@@ -40,7 +40,7 @@ const sendGiftEmail = async (recipientEmail, recipientName) => {
     const fallbackHtml = `
       <h1>¡Hola, ${finalRecipientName}!</h1>
       <p>Gracias por registrarte. Accede a tus regalos aquí:</p>
-      <a href="https://libros-mu.vercel.app/dashboard">Acceder a mis regalos</a>
+      <a href="https://libros-mu.vercel.app/user/login">Acceder a mis regalos</a>
     `;
     return await sendCustomEmail(recipientEmail, '🎁 ¡Tu Regalo Especial de Ángeles Sagrados!', fallbackHtml);
   }

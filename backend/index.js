@@ -65,42 +65,24 @@ app.delete('/api/files', verifyToken, async (req, res) => {
 });
 
 // Ruta para obtener la lista de contenido
-app.get('/api/content', (req, res) => {
-  const uploadDir = path.join(__dirname, 'uploads');
-  fs.readdir(uploadDir, (err, files) => {
-    if (err) {
-      // Si el directorio no existe, devolvemos una lista vacía
-      if (err.code === 'ENOENT') {
-        return res.status(200).json([]);
-      }
-      return res.status(500).send({ message: 'Error al leer el contenido.' });
-    }
+app.get('/api/content', async (req, res) => {
+  const { authorization } = req.headers;
+  if (!authorization) {
+    return res.status(401).send({ message: 'No autorizado.' });
+  }
+  const token = authorization.split(' ')[1];
+  const { rows } = await sql`SELECT id FROM contacts WHERE auth_token = ${token}`;
+  if (rows.length === 0) {
+    return res.status(401).send({ message: 'No autorizado.' });
+  }
 
-    // Ordenar archivos por fecha (el más reciente primero)
-    const sortedFiles = files.sort((a, b) => {
-      const timeA = parseInt(a.split('-')[0], 10);
-      const timeB = parseInt(b.split('-')[0], 10);
-      return timeB - timeA;
-    });
-
-    const content = sortedFiles.map(file => {
-      const extension = path.extname(file).toLowerCase();
-      let type = 'file';
-      if (['.mp4', '.mov', '.avi'].includes(extension)) {
-        type = 'video';
-      } else if (['.mp3', '.wav', '.ogg'].includes(extension)) {
-        type = 'audio';
-      } else if (extension === '.pdf') {
-        type = 'pdf';
-      }
-      return {
-        name: file,
-        url: `/uploads/${file}`,
-        type: type
-      };
-    });
-    res.status(200).json(content);
-  });
+  const { blobs } = await list();
+  const content = blobs.map(blob => ({
+    name: blob.pathname.replace(/^\//, ''),
+    url: blob.url,
+    type: blob.pathname.split('.').pop()
+  }));
+  res.status(200).json(content);
 });
 
 // --- Rutas Públicas ---
@@ -142,6 +124,53 @@ app.post('/api/admin/login', (req, res) => {
     res.json({ token });
   } else {
     res.status(401).json({ message: 'Credenciales incorrectas' });
+  }
+});
+
+app.post('/api/user/login', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).send({ message: 'El correo es obligatorio.' });
+  }
+  try {
+    const { rows } = await sql`SELECT id, name, email, whatsapp, profile_picture_url, auth_token FROM contacts WHERE email = ${email}`;
+    if (rows.length === 0) {
+      return res.status(404).send({ message: 'El correo no está registrado.' });
+    }
+    // En un futuro, aquí se podría enviar un email con un enlace de login
+    res.status(200).json(rows[0]);
+  } catch (error) {
+    console.error('Error en el login de usuario:', error);
+    res.status(500).send({ message: 'Error interno del servidor.' });
+  }
+});
+
+app.put('/api/user/profile', async (req, res) => {
+  const { token, name, whatsapp } = req.body;
+  if (!token) {
+    return res.status(401).send({ message: 'No autorizado.' });
+  }
+  try {
+    await sql`UPDATE contacts SET name = ${name}, whatsapp = ${whatsapp} WHERE auth_token = ${token}`;
+    res.status(200).send({ message: 'Perfil actualizado.' });
+  } catch (error) {
+    console.error('Error al actualizar el perfil:', error);
+    res.status(500).send({ message: 'Error interno del servidor.' });
+  }
+});
+
+app.post('/api/user/profile-picture', async (req, res) => {
+  const { token, filename, body } = req.body;
+  if (!token || !filename || !body) {
+    return res.status(400).send({ message: 'Faltan datos.' });
+  }
+  try {
+    const blob = await put(filename, body, { access: 'public' });
+    await sql`UPDATE contacts SET profile_picture_url = ${blob.url} WHERE auth_token = ${token}`;
+    res.status(200).json({ url: blob.url });
+  } catch (error) {
+    console.error('Error al subir la foto de perfil:', error);
+    res.status(500).send({ message: 'Error interno del servidor.' });
   }
 });
 

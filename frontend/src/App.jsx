@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/admin/LoginPage';
 import DashboardPage from './pages/admin/DashboardPage';
+import UserLoginPage from './pages/UserLoginPage';
 import UserDashboard from './pages/UserDashboard';
 import './styles/main.css';
 
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/admin/login" element={<LoginPage />} />
         <Route path="/admin/dashboard" element={<DashboardPage />} />
+        <Route path="/user/login" element={<UserLoginPage />} />
         <Route path="/dashboard" element={<UserDashboard />} />
       </Routes>
     </Router>

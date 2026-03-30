@@ -8,12 +8,18 @@ const createContactsTable = async () => {
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         whatsapp VARCHAR(50),
+        profile_picture_url TEXT,
+        auth_token UUID DEFAULT gen_random_uuid(),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
-    console.log('Tabla de contactos verificada/creada con éxito.');
+    // Add new columns if they don't exist for backward compatibility
+    await sql`ALTER TABLE contacts ADD COLUMN IF NOT EXISTS profile_picture_url TEXT;`;
+    await sql`ALTER TABLE contacts ADD COLUMN IF NOT EXISTS auth_token UUID;`;
+
+    console.log('Tabla de contactos verificada/actualizada con éxito.');
   } catch (error) {
-    console.error('Error al crear la tabla de contactos:', error);
+    console.error('Error al crear/actualizar la tabla de contactos:', error);
   }
 };
 
