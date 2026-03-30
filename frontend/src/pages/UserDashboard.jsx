@@ -72,18 +72,42 @@ const UserDashboard = () => {
       {/* Meditaciones */}
       <div className="card">
           <h2 style={{fontFamily: 'Playfair Display, serif', color: '#A084C4'}}>🧘‍♀️ Meditaciones que te Acompañarán</h2>
-          {/* Aquí puedes incrustar videos de YouTube o audios */}
-          <p>[VIDEO/AUDIO DE MEDITACIÓN 1 AQUÍ]</p>
-          <p>[VIDEO/AUDIO DE MEDITACIÓN 2 AQUÍ]</p>
+          <p>Aquí tienes dos meditaciones para empezar. La primera para conectar con tu intención y la segunda para cerrar tu ritual.</p>
+          <div className="meditation-container" style={{margin: '1.5rem 0', textAlign: 'center'}}>
+              <h4 style={{color: '#A084C4'}}>Meditación de Intención</h4>
+              <iframe 
+                  width="560" 
+                  height="315" 
+                  src="https://www.youtube.com/embed/g_sf_p3O3B4"
+                  title="Meditación Guiada para Empezar el Día" 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen
+                  style={{borderRadius: '8px', maxWidth: '100%'}}>
+              </iframe>
+          </div>
+          <div className="meditation-container" style={{margin: '1.5rem 0', textAlign: 'center'}}>
+              <h4 style={{color: '#A084C4'}}>Meditación de Cierre</h4>
+              <iframe 
+                  width="560" 
+                  height="315" 
+                  src="https://www.youtube.com/embed/c5r4_G_r7sI"
+                  title="Meditación Guiada para Dormir Profundamente" 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen
+                  style={{borderRadius: '8px', maxWidth: '100%'}}>
+              </iframe>
+          </div>
       </div>
 
       {/* Cierre y Conexión */}
       <div className="card" style={{textAlign: 'center'}}>
         <h2 style={{fontFamily: 'Playfair Display, serif', color: '#A084C4'}}>💖 Cierre y Conexión</h2>
         <p>¿Necesitas ayuda o quieres compartir tu proceso? Escríbeme directamente por WhatsApp:</p>
-        <p style={{fontWeight: 'bold'}}>+34 614 32 92 83</p>
+        <a href="https://wa.me/34614329283" target="_blank" rel="noopener noreferrer" style={{fontWeight: 'bold', color: '#A084C4', textDecoration: 'none', fontSize: '1.1rem'}}>+34 614 32 92 83</a>
         <p style={{marginTop: '2rem'}}><strong>✨ Tu voz es luz para otros ✨</strong><br/>Si este viaje está tocando tu corazón, me encantaría que compartieras tu experiencia.</p>
-        <a href="#" className="button">Dejar mi reseña en Amazon</a>
+        <a href="https://www.amazon.es/review/create-review?asin=B0CL5T2294" target="_blank" rel="noopener noreferrer" className="button">Dejar mi reseña en Amazon</a>
       </div>
 
     </div>
