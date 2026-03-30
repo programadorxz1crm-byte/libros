@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './VideoPlayer.css';
 
 const VideoPlayer = () => {
-  const [videoUrl, setVideoUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/embed/o2eO72dAurM'); // URL por defecto
 
   useEffect(() => {
     const fetchVideoUrl = async () => {
