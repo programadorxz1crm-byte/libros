@@ -95,15 +95,11 @@ app.post('/api/register', async (req, res) => {
     await createContactsTable();
     const result = await sql`INSERT INTO contacts (name, email, whatsapp) VALUES (${name}, ${email}, ${whatsapp}) ON CONFLICT (email) DO NOTHING`;
 
-    // 2. Send notifications only for new users
-    if (result.rowCount > 0) {
-      console.log(`Nuevo contacto guardado: ${email}. Enviando notificaciones...`);
-      await sendGiftEmail(email, name);
-      await sendWhatsAppMessage(whatsapp, name);
-      console.log(`Notificaciones enviadas para: ${email}`);
-    } else {
-      console.log(`El contacto ${email} ya existía. No se enviaron notificaciones duplicadas.`);
-    }
+    // Siempre intentar enviar las notificaciones
+    console.log(`Procesando registro para: ${email}. Enviando notificaciones...`);
+    await sendGiftEmail(email, name);
+    await sendWhatsAppMessage(whatsapp, name);
+    console.log(`Notificaciones enviadas para: ${email}`);
 
     // 3. Respond with success
     res.status(200).send({ message: 'Registro procesado con éxito.' });
