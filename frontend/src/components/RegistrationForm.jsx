@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import Modal from './Modal'; // Importar el nuevo componente
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -7,7 +7,8 @@ const RegistrationForm = () => {
     email: '',
     whatsapp: '',
   });
-  const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({ title: '', body: '' });
 
   const handleChange = (e) => {
     setFormData({
@@ -28,53 +29,72 @@ const RegistrationForm = () => {
       });
 
       if (response.ok) {
-        alert('¡Gracias por registrarte! Revisa tu correo para acceder a tus regalos.');
-        navigate('/dashboard'); // Redirigir al dashboard
+        setModalContent({
+          title: '¡Registro completado!',
+          body: 'Hemos enviado un enlace a tu correo para que puedas acceder a tus regalos. ¡Revisa tu bandeja de entrada (y la de spam)!'
+        });
+        setIsModalOpen(true);
+        setFormData({ name: '', email: '', whatsapp: '' }); // Limpiar el formulario
       } else {
-        alert('Hubo un error al registrar tus datos. Por favor, inténtalo de nuevo.');
+        setModalContent({
+          title: 'Error en el registro',
+          body: 'Hubo un problema al procesar tu registro. Por favor, inténtalo de nuevo más tarde.'
+        });
+        setIsModalOpen(true);
       }
     } catch (error) {
       console.error('Error al enviar los datos:', error);
-      alert('Hubo un problema de conexión. Por favor, inténtalo de nuevo.');
+      setModalContent({
+        title: 'Error de conexión',
+        body: 'No pudimos comunicarnos con el servidor. Revisa tu conexión a internet e inténtalo de nuevo.'
+      });
+      setIsModalOpen(true);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="name">Nombre:</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="email">Correo electrónico:</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="whatsapp">WhatsApp:</label>
-        <input
-          type="text"
-          id="whatsapp"
-          name="whatsapp"
-          value={formData.whatsapp}
-          onChange={handleChange}
-        />
-      </div>
-      <button type="submit">Obtener Regalo</button>
-    </form>
+    <>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="name">Nombre:</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="email">Correo electrónico:</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="whatsapp">WhatsApp:</label>
+          <input
+            type="text"
+            id="whatsapp"
+            name="whatsapp"
+            value={formData.whatsapp}
+            onChange={handleChange}
+          />
+        </div>
+        <button type="submit">Obtener Regalo</button>
+      </form>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <h2>{modalContent.title}</h2>
+        <p>{modalContent.body}</p>
+      </Modal>
+    </>
   );
 };
 
